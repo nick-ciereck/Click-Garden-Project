@@ -209,7 +209,7 @@ export default function ClickGardenWebsite() {
           </div>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <div className="rounded-3xl border border-green-100 bg-white p-5 shadow-sm sm:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -236,20 +236,30 @@ export default function ClickGardenWebsite() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-green-100 bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="text-xl font-semibold text-slate-900">Fast answers for {monthFilter}</h2>
+          <aside className="rounded-3xl border border-green-100 bg-white p-5 shadow-sm sm:p-6 xl:sticky xl:top-4 self-start">
+            <h2 className="text-xl font-semibold text-slate-900">Right now in {monthFilter}</h2>
+            <p className="mt-1 text-sm text-slate-500">Quick answers that stay visible on desktop and move above the plant list on phones.</p>
             <div className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
-              <div className="rounded-2xl bg-blue-50 p-4"><strong>Seeds to germinate now:</strong> {buckets.germinate.slice(0, 6).map((r) => r.plant.name).join(", ") || "None right now."}</div>
-              <div className="rounded-2xl bg-purple-50 p-4"><strong>Cuttings now:</strong> {buckets.cuttings.slice(0, 6).map((r) => r.plant.name).join(", ") || "None right now."}</div>
-              <div className="rounded-2xl bg-amber-50 p-4"><strong>Transplant now:</strong> {buckets.transplant.slice(0, 6).map((r) => r.plant.name).join(", ") || "None right now."}</div>
-              <div className="rounded-2xl bg-emerald-50 p-4"><strong>Light fertilizing candidates:</strong> {buckets.fertilize.slice(0, 6).map((r) => r.plant.name).join(", ") || "None right now."}</div>
+              <div className="rounded-2xl bg-blue-50 p-4"><strong>🌱 Seeds to germinate right now:</strong> {buckets.germinate.slice(0, 6).map((r) => r.plant.name).join(", ") || "None right now."}</div>
+              <div className="rounded-2xl bg-purple-50 p-4"><strong>✂️ Cuttings to take now:</strong> {buckets.cuttings.slice(0, 6).map((r) => r.plant.name).join(", ") || "None right now."}</div>
+              <div className="rounded-2xl bg-amber-50 p-4"><strong>🔁 Plants to transplant now:</strong> {buckets.transplant.slice(0, 6).map((r) => r.plant.name).join(", ") || "None right now."}</div>
+              <div className="rounded-2xl bg-emerald-50 p-4"><strong>🧪 Plants to fertilize now:</strong> {buckets.fertilize.slice(0, 6).map((r) => r.plant.name).join(", ") || "None right now."}</div>
             </div>
-          </div>
+            <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+              <strong>Phone note:</strong> On small screens, this summary stacks above the library so the most useful actions stay easy to scan without opening every plant.
+            </div>
+          </aside>
         </section>
 
         <section className="rounded-3xl border border-green-100 bg-white p-5 shadow-sm sm:p-6">
-          <h2 className="text-xl font-semibold text-slate-900">Plant library highlights</h2>
-          <p className="mt-1 text-sm text-slate-500">No extra menus. Each plant shows what kind of action it needs, plus how urgent it is this week.</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900">Plant library highlights</h2>
+              <p className="mt-1 text-sm text-slate-500">Use the right-side summary for triage, then scan these cards for why each plant is highlighted.</p>
+            </div>
+            <div className="rounded-2xl bg-slate-50 px-4 py-2 text-sm text-slate-700">Phone-friendly cards</div>
+          </div>
+          <p className="mt-1 text-sm text-slate-500">Each plant shows what kind of action it needs, plus how urgent it is this week. Your grow tent is already factored into indoor starts, cuttings, and hardening-off timing.</p>
           <div className="mt-4 grid gap-3">
             {currentMonthPlants.map((plant) => {
               const flags = getFlags(plant, monthFilter);
@@ -272,6 +282,7 @@ export default function ClickGardenWebsite() {
                   <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1fr]">
                     <div className="rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-700"><strong>Why now:</strong> {urgency.reason}</div>
                     <div className="rounded-xl bg-green-50 p-3 text-sm leading-6 text-slate-700"><strong>What to do:</strong> {getActionGuide(plant, monthFilter)}</div>
+                    <div className="rounded-xl bg-white p-3 text-sm leading-6 text-slate-700 ring-1 ring-slate-100 lg:col-span-2"><strong>Phone detail:</strong> This card is meant to replace a cramped table row on mobile, so the reason and action stay readable without extra taps.</div>
                   </div>
                 </div>
               );
