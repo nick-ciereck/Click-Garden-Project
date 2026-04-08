@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useMemo, useState } from "react";
 import { Search, Sprout, CalendarDays, Heart, Sun, Package, FlaskConical, Save } from "lucide-react";
 
