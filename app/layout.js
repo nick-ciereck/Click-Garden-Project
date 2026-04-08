@@ -1,3 +1,5 @@
+import "./globals.css";
+
 export const metadata = {
   title: "Click Garden",
   description: "Your garden dashboard"
