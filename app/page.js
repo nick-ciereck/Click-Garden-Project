@@ -364,13 +364,13 @@ export default function ClickGardenWebsite() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f0fdf4,_#ffffff_45%,_#f8fafc)] text-slate-800">
       <header className="sticky top-0 z-20 border-b border-green-100 bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 sm:py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
               <Heart className="h-3.5 w-3.5" />
               Click Garden
             </div>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-green-900 sm:text-4xl">Shared garden dashboard</h1>
+            <h1 className="mt-3 text-2xl font-bold tracking-tight text-green-900 sm:text-4xl">Shared garden dashboard</h1>
             <p className="mt-2 max-w-3xl text-sm text-slate-600 sm:text-base">Built from your workbook with plant schedules, pH targets, watering guidance, fertilizer notes, editing tools, local saves, and a dynamic monthly breakdown for San Jose.</p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:flex">
@@ -386,8 +386,8 @@ export default function ClickGardenWebsite() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-8 px-6 py-8">
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8">
+        <section className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-5">
           {[
             { icon: Sprout, label: "Tracked plants", value: plantsData.length, note: "Imported from your planning sheets" },
             { icon: CalendarDays, label: `${monthFilter} actions`, value: currentMonthPlants.length, note: "Plants with a task this month" },
@@ -395,8 +395,8 @@ export default function ClickGardenWebsite() {
             { icon: Package, label: "Fertilizers on hand", value: fertilizers.length, note: fertilizers.join(", ") },
             { icon: Heart, label: "Wishlist items", value: wishlist.length, note: wishlist.join(", ") },
           ].map((card) => (
-            <div key={card.label} className="rounded-3xl border border-green-100 bg-white p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
+            <div key={card.label} className="rounded-3xl border border-green-100 bg-white p-4 sm:p-5 shadow-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="text-sm text-slate-500">{card.label}</div>
                   <div className="mt-2 text-3xl font-bold text-green-900">{card.value}</div>
@@ -408,19 +408,19 @@ export default function ClickGardenWebsite() {
           ))}
         </section>
 
-        <section className="rounded-[28px] border border-green-100 bg-white p-6 shadow-sm">
-          <div className="grid gap-6 lg:grid-cols-2">
+        <section className="rounded-[28px] border border-green-100 bg-white p-4 shadow-sm sm:p-6">
+          <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
             <div>
               <h2 className="text-2xl font-semibold text-slate-900">Quick edit tools</h2>
               <p className="mt-1 text-sm text-slate-500">Add new plants and wishlist seeds directly from the dashboard.</p>
               <div className="mt-4 rounded-3xl border border-slate-100 p-4">
                 <div className="text-sm font-semibold text-slate-900">Add a plant</div>
-                <div className="mt-3 grid gap-3 md:grid-cols-3">
-                  <input value={newPlantName} onChange={(e) => setNewPlantName(e.target.value)} className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-green-400" placeholder="Plant name" />
-                  <input value={newPlantType} onChange={(e) => setNewPlantType(e.target.value)} className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-green-400" placeholder="Type" />
-                  <input value={newPlantMonthAction} onChange={(e) => setNewPlantMonthAction(e.target.value)} className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-green-400" placeholder={`Action for ${monthFilter}`} />
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                  <input value={newPlantName} onChange={(e) => setNewPlantName(e.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-green-400" placeholder="Plant name" />
+                  <input value={newPlantType} onChange={(e) => setNewPlantType(e.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-green-400" placeholder="Type" />
+                  <input value={newPlantMonthAction} onChange={(e) => setNewPlantMonthAction(e.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-green-400" placeholder={`Action for ${monthFilter}`} />
                 </div>
-                <button onClick={addPlant} className="mt-3 rounded-2xl bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800">Add plant</button>
+                <button onClick={addPlant} className="mt-3 w-full rounded-2xl bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800 sm:w-auto">Add plant</button>
               </div>
             </div>
             <div>
@@ -428,9 +428,9 @@ export default function ClickGardenWebsite() {
               <p className="mt-1 text-sm text-slate-500">Track seeds and varieties you want to pick up next.</p>
               <div className="mt-4 rounded-3xl border border-slate-100 p-4">
                 <div className="text-sm font-semibold text-slate-900">Add wishlist seed</div>
-                <div className="mt-3 flex gap-3">
-                  <input value={newWishlistItem} onChange={(e) => setNewWishlistItem(e.target.value)} className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-green-400" placeholder="Example: Lemon basil" />
-                  <button onClick={addWishlistItem} className="rounded-2xl bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800">Add</button>
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                  <input value={newWishlistItem} onChange={(e) => setNewWishlistItem(e.target.value)} className="w-full flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-green-400" placeholder="Example: Lemon basil" />
+                  <button onClick={addWishlistItem} className="w-full rounded-2xl bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800 sm:w-auto">Add</button>
                 </div>
                 <div className="mt-3 text-xs text-slate-500">New entries appear instantly below in your seed wishlist section.</div>
               </div>
@@ -438,14 +438,14 @@ export default function ClickGardenWebsite() {
           </div>
         </section>
 
-        <section className="grid gap-8 xl:grid-cols-[1.4fr_0.9fr]">
+        <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
           <div className="rounded-[28px] border border-green-100 bg-white p-6 shadow-sm">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <h2 className="text-2xl font-semibold text-slate-900">Plant library</h2>
                 <p className="mt-1 text-sm text-slate-500">Search your plant list, filter by type, and see what each plant is doing in the selected month.</p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <label className="relative block">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input value={query} onChange={(e) => setQuery(e.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-green-400" placeholder="Search plant, type, or action" />
@@ -461,7 +461,7 @@ export default function ClickGardenWebsite() {
 
             <div className="mt-5 overflow-hidden rounded-3xl border border-slate-100">
               <div className="max-h-[620px] overflow-auto">
-                <table className="min-w-full text-left text-sm">
+                <table className="min-w-[720px] text-left text-sm">
                   <thead className="sticky top-0 bg-slate-50 text-slate-500">
                     <tr>
                       <th className="px-4 py-3 font-medium">Plant</th>
@@ -497,7 +497,7 @@ export default function ClickGardenWebsite() {
             <div className="rounded-[28px] border border-green-100 bg-white p-6 shadow-sm">
               <h2 className="text-2xl font-semibold text-slate-900">Plant profile</h2>
               <div className="mt-4 rounded-3xl bg-gradient-to-br from-green-100 to-lime-50 p-5">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h3 className="text-2xl font-bold text-green-950">{selectedPlant.name}</h3>
                     <p className="mt-1 text-sm text-green-900">{selectedPlant.type || "Unsorted"} • {guessSun(selectedPlant)}</p>
@@ -505,7 +505,7 @@ export default function ClickGardenWebsite() {
                   <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-green-800 shadow-sm">{guessStage(selectedPlant.schedule, monthFilter)}</span>
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="mt-5 grid gap-3 lg:grid-cols-2">
                   <div className="rounded-2xl bg-white p-4">
                     <div className="text-xs uppercase tracking-wide text-slate-500">Target pH</div>
                     <input value={selectedProfile.ph} onChange={(e) => updateSelectedPlant({ ph: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-green-400" />
@@ -557,14 +557,14 @@ export default function ClickGardenWebsite() {
           </div>
         </section>
 
-        <section className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
+        <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-[28px] border border-green-100 bg-white p-6 shadow-sm">
             <h2 className="text-2xl font-semibold text-slate-900">{monthFilter} sowing guide</h2>
             <p className="mt-1 text-sm text-slate-500">A small list of what to sow now and how to sow it.</p>
             <div className="mt-4 space-y-3">
               {sowNowPlants.length ? sowNowPlants.slice(0, 10).map((plant) => (
                 <div key={plant.name} className="rounded-2xl border border-slate-100 p-4">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="font-medium text-slate-900">{plant.name}</div>
                       <div className="mt-1 text-sm text-slate-500">{plant.schedule?.[monthFilter]}</div>
@@ -588,7 +588,7 @@ export default function ClickGardenWebsite() {
           </div>
         </section>
 
-        <section className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
+        <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-[28px] border border-green-100 bg-white p-6 shadow-sm">
             <div className="flex items-center gap-2">
               <Package className="h-5 w-5 text-green-700" />
@@ -623,8 +623,8 @@ export default function ClickGardenWebsite() {
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-green-100 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
+        <section className="rounded-[28px] border border-green-100 bg-white p-4 shadow-sm sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-2xl font-semibold text-slate-900">Garden insights</h2>
               <p className="mt-1 text-sm text-slate-500">Quick takeaways synthesized from your current garden plan.</p>
@@ -642,3 +642,4 @@ export default function ClickGardenWebsite() {
     </div>
   );
 }
+
