@@ -239,6 +239,18 @@ export default function ClickGardenWebsite() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">Click Garden</div>
               <h1 className="mt-3 text-2xl font-bold text-green-950 sm:text-4xl">Smarter monthly assistant</h1>
+              <button
+                    onClick={addPlant}
+                    style={{
+                      marginTop: "10px",
+                      padding: "10px",
+                      background: "green",
+                      color: "white",
+                      borderRadius: "8px"
+                    }}
+                  >
+                    Add Test Plant
+                  </button>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">This view keeps the quick answers you asked for while bringing back clickable plant details like pH, descriptions, and fertilizer notes.</p>
             </div>
             <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-green-400">
