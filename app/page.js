@@ -2,6 +2,18 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRightLeft, Beaker, CloudRain, Scissors, Sprout, Sun } from "lucide-react";
 
+"use client";
+import { supabase } from "../lib/supabase";
+
+async function addPlant() {
+  const { data, error } = await supabase
+    .from("plants")
+    .insert([{ name: "Basil", type: "Herb" }]);
+
+  console.log("DATA:", data);
+  console.log("ERROR:", error);
+}
+
 const months = ["March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February"];
 
 const weatherSummary = {
@@ -12,6 +24,8 @@ const weatherSummary = {
   rainyDays: ["Thursday", "Friday", "Saturday", "Sunday"],
   coolNights: true,
 };
+
+
 
 const basePlants = [
   { name: "Basil: Sweet italian large leaf", type: "Herbs", schedule: { April: "Indoor Start / Direct Sow", May: "Indoor Start / Direct Sow / Cuttings", July: "Cuttings" } },
