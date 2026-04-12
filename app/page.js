@@ -1,8 +1,7 @@
 "use client";
+
 import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRightLeft, Beaker, CloudRain, Scissors, Sprout, Sun } from "lucide-react";
-
-"use client";
 import { supabase } from "../lib/supabase";
 
 async function addPlant() {
