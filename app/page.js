@@ -205,17 +205,35 @@ function getPlantDetails(plant) {
 
 export default function ClickGardenWebsite() {
   const [monthFilter, setMonthFilter] = useState("April");
-  const [plantsData] = useState(basePlants);
+  const [plantsData, setPlantsData] = useState([]);
   const [selectedPlantName, setSelectedPlantName] = useState(basePlants[0]?.name || "");
 
-  const currentMonthPlants = useMemo(() => plantsData.filter((p) => p.schedule?.[monthFilter]), [plantsData, monthFilter]);
+const currentMonthPlants = useMemo(() => {
+  return plantsData.length ? plantsData : basePlants;
+}, [plantsData, monthFilter]);
 
   useEffect(() => {
     if (!currentMonthPlants.find((p) => p.name === selectedPlantName)) {
       setSelectedPlantName(currentMonthPlants[0]?.name || basePlants[0]?.name || "");
     }
   }, [currentMonthPlants, selectedPlantName]);
+  
+  useEffect(() => {
+  async function fetchPlants() {
+    const { data, error } = await supabase
+      .from("plants")
+      .select("*");
 
+    if (error) {
+      console.log("FETCH ERROR:", error);
+    } else {
+      console.log("FETCHED:", data);
+      setPlantsData(data);
+    }
+  }
+
+  fetchPlants();
+}, []);
   const buckets = useMemo(() => {
     const rows = currentMonthPlants.map((p) => ({ plant: p, flags: getFlags(p, monthFilter), urgency: getUrgency(p, monthFilter) }));
     return {
