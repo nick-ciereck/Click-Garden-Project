@@ -3,86 +3,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRightLeft, Beaker, CloudRain, Scissors, Sprout, Sun } from "lucide-react";
 import { supabase } from "../lib/supabase";
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December"
-];
-const [newPlant, setNewPlant] = useState({
-  name: "",
-  type: "",
-  month: months[new Date().getMonth()],
-  action: "",
-  ph: "",
-  description: "",
-  fertilizer: "",
-  signs: ""
-});
-
-async function addPlant() {
-  if (!newPlant.name) return;
-
-  const { data, error } = await supabase
-    .from("plants")
-    .insert([
-      {
-        name: newPlant.name,
-        type: newPlant.type,
-        schedule: {
-          [newPlant.month]: newPlant.action
-        },
-        ph: newPlant.ph,
-        description: newPlant.description,
-        fertilizer: newPlant.fertilizer || "",
-        signs: newPlant.signs || ""
-      }
-    ])
-    .select();
-
-  if (error) {
-    console.log("ERROR:", error);
-  } else {
-    setPlantsData((prev) => [...prev, ...data]);
-  }
-}
-async function autoFillPlant() {
-  if (!newPlant.name) return;
-
-  const res = await fetch("/api/autofill", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ plantName: newPlant.name }),
-  });
-
-  const data = await res.json();
-
-  if (data.error) {
-    console.log("AUTO FILL ERROR:", data.error);
-    return;
-  }
-
-  setNewPlant((prev) => ({
-    ...prev,
-    type: data.type || "",
-    ph: data.ph || "",
-    description: data.description || "",
-    fertilizer: data.fertilizer || "",
-    signs: data.signs || "",
-    month: data.schedule ? Object.keys(data.schedule)[0] : prev.month,
-    action: data.schedule ? Object.values(data.schedule)[0] : "",
-  }));
-}
 
 
 const weatherSummary = {
@@ -273,13 +193,138 @@ function getPlantDetails(plant) {
   return { ph, description, fertilizer, signs };
 }
 
+  const months = [
+    "January",
+    "February",
+    "March",
+   "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+  
 export default function ClickGardenWebsite() {
   const [monthFilter, setMonthFilter] = useState("April");
   const [plantsData, setPlantsData] = useState([]);
   const [selectedPlantName, setSelectedPlantName] = useState(basePlants[0]?.name || "");
 
+  const [newPlant, setNewPlant] = useState({
+    name: "",
+    type: "",
+    month: months[new Date().getMonth()],
+    action: "",
+    ph: "",
+    description: "",
+    fertilizer: "",
+    signs: ""
+  });
+
+
+async function addPlant() {
+  if (!newPlant.name) return;
+
+  const { data, error } = await supabase
+    .from("plants")
+    .insert([
+      {
+        name: newPlant.name,
+        type: newPlant.type,
+        schedule: {
+          [newPlant.month]: newPlant.action
+        },
+        ph: newPlant.ph,
+        description: newPlant.description,
+        fertilizer: newPlant.fertilizer || "",
+        signs: newPlant.signs || ""
+      }
+    ])
+    .select();
+
+  if (error) {
+    console.log("ERROR:", error);
+  } else {
+	  setPlantsData((prev) => [...prev, ...data]);
+		setNewPlant({
+			  name: "",
+			  type: "",
+			  month: months[new Date().getMonth()],
+			  action: "",
+			  ph: "",
+			  description: "",
+			  fertilizer: "",
+			  signs: ""
+			});
+  }
+}
+
+async function autoFillPlant() {
+  if (!newPlant.name) return;
+
+  const search = newPlant.name.toLowerCase();
+
+  // 🔹 STEP 1: Try DB first
+  const match = plantsData.find((p) =>
+    p.name.toLowerCase().includes(search)
+  );
+
+  if (match) {
+    console.log("USING DB MATCH");
+
+    setNewPlant((prev) => ({
+      ...prev,
+      name: match.name,
+      type: match.type || "",
+      ph: match.ph || "",
+      description: match.description || "",
+      fertilizer: match.fertilizer || "",
+      signs: match.signs || "",
+      month: match.schedule ? Object.keys(match.schedule)[0] : prev.month,
+      action: match.schedule ? Object.values(match.schedule)[0] : "",
+    }));
+
+    return; // 🚨 STOP here — don't call API
+  }
+
+  // 🔹 STEP 2: fallback to API
+  console.log("USING API FALLBACK");
+
+  const res = await fetch("/api/autofill", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ plantName: newPlant.name }),
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    alert(data.error);
+    return;
+  }
+
+  setNewPlant((prev) => ({
+    ...prev,
+    name: data.name || prev.name,
+    type: data.type || "",
+    ph: data.ph || "",
+    description: data.description || "",
+    fertilizer: data.fertilizer || "",
+    signs: data.signs || "",
+    month: data.schedule ? Object.keys(data.schedule)[0] : prev.month,
+    action: data.schedule ? Object.values(data.schedule)[0] : "",
+  }));
+}
+
+
 const currentMonthPlants = useMemo(() => {
-  return plantsData.length ? plantsData : basePlants;
+  const source = plantsData.length ? plantsData : basePlants;
+  return source.filter((p) => p.schedule?.[monthFilter]);
 }, [plantsData, monthFilter]);
 
   useEffect(() => {
@@ -326,18 +371,44 @@ const currentMonthPlants = useMemo(() => {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">Click Garden</div>
               <h1 className="mt-3 text-2xl font-bold text-green-950 sm:text-4xl">Smarter monthly assistant</h1>
-              <button
-                    onClick={addPlant}
-                    style={{
-                      marginTop: "10px",
-                      padding: "10px",
-                      background: "green",
-                      color: "white",
-                      borderRadius: "8px"
-                    }}
-                  >
-                    Add Test Plant
-                  </button>
+					<div className="mt-4 space-y-3">
+					  <input
+						placeholder="Plant name"
+						value={newPlant.name}
+						onChange={(e) =>
+						  setNewPlant({ ...newPlant, name: e.target.value })
+						}
+						className="border p-2 rounded w-full"
+					  />
+					  <input
+						placeholder="Type"
+						value={newPlant.type}
+						onChange={(e) =>
+						  setNewPlant({ ...newPlant, type: e.target.value })
+						}
+						className="border p-2 rounded w-full"
+					  />
+					  <input
+						placeholder="Action (e.g. Direct sow)"
+						value={newPlant.action}
+						onChange={(e) =>
+						  setNewPlant({ ...newPlant, action: e.target.value })
+						}
+						className="border p-2 rounded w-full"
+					  />
+					  <button
+						onClick={autoFillPlant}
+						className="bg-blue-600 text-white px-4 py-2 rounded"
+					  >
+						Auto Fill
+					  </button>
+					  <button
+						onClick={addPlant}
+						className="bg-green-700 text-white px-4 py-2 rounded"
+					  >
+						Add Plant
+					  </button>
+					</div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">This view keeps the quick answers you asked for while bringing back clickable plant details like pH, descriptions, and fertilizer notes.</p>
             </div>
             <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-green-400">
