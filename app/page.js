@@ -3,17 +3,87 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRightLeft, Beaker, CloudRain, Scissors, Sprout, Sun } from "lucide-react";
 import { supabase } from "../lib/supabase";
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+];
+const [newPlant, setNewPlant] = useState({
+  name: "",
+  type: "",
+  month: months[new Date().getMonth()],
+  action: "",
+  ph: "",
+  description: "",
+  fertilizer: "",
+  signs: ""
+});
 
 async function addPlant() {
+  if (!newPlant.name) return;
+
   const { data, error } = await supabase
     .from("plants")
-    .insert([{ name: "Basil", type: "Herb" }]);
+    .insert([
+      {
+        name: newPlant.name,
+        type: newPlant.type,
+        schedule: {
+          [newPlant.month]: newPlant.action
+        },
+        ph: newPlant.ph,
+        description: newPlant.description,
+        fertilizer: newPlant.fertilizer || "",
+        signs: newPlant.signs || ""
+      }
+    ])
+    .select();
 
-  console.log("DATA:", data);
-  console.log("ERROR:", error);
+  if (error) {
+    console.log("ERROR:", error);
+  } else {
+    setPlantsData((prev) => [...prev, ...data]);
+  }
+}
+async function autoFillPlant() {
+  if (!newPlant.name) return;
+
+  const res = await fetch("/api/autofill", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ plantName: newPlant.name }),
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    console.log("AUTO FILL ERROR:", data.error);
+    return;
+  }
+
+  setNewPlant((prev) => ({
+    ...prev,
+    type: data.type || "",
+    ph: data.ph || "",
+    description: data.description || "",
+    fertilizer: data.fertilizer || "",
+    signs: data.signs || "",
+    month: data.schedule ? Object.keys(data.schedule)[0] : prev.month,
+    action: data.schedule ? Object.values(data.schedule)[0] : "",
+  }));
 }
 
-const months = ["March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February"];
 
 const weatherSummary = {
   location: "San Jose, CA",
