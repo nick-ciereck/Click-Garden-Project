@@ -267,58 +267,93 @@ async function autoFillPlant() {
 
   const search = newPlant.name.toLowerCase();
 
-  // 🔹 STEP 1: Try DB first
-  const match = plantsData.find((p) =>
+  // 🔹 STEP 1: find matches in DB
+  const matches = plantsData.filter((p) =>
     p.name.toLowerCase().includes(search)
   );
 
+  const match = matches.length ? matches[0] : null;
+
   if (match) {
-    console.log("USING DB MATCH");
+    console.log("FOUND DB MATCH:", match);
 
-    setNewPlant((prev) => ({
-      ...prev,
-      name: match.name,
-      type: match.type || "",
-      ph: match.ph || "",
-      description: match.description || "",
-      fertilizer: match.fertilizer || "",
-      signs: match.signs || "",
-      month: match.schedule ? Object.keys(match.schedule)[0] : prev.month,
-      action: match.schedule ? Object.values(match.schedule)[0] : "",
-    }));
+    const hasGoodData =
+      match.description &&
+      match.description !== "EMPTY" &&
+      match.description.trim() !== "";
 
-    return; // 🚨 STOP here — don't call API
+    // 🔥 If DB is good → use it
+    if (hasGoodData) {
+      console.log("USING DB MATCH");
+
+      setNewPlant((prev) => ({
+        ...prev,
+        name: match.name,
+        type: match.type || "",
+        ph: match.ph || "",
+        description: match.description || "",
+        fertilizer: match.fertilizer || "",
+        signs: match.signs || "",
+        month: match.schedule ? Object.keys(match.schedule)[0] : prev.month,
+        action: match.schedule ? Object.values(match.schedule)[0] : "",
+      }));
+
+      return;
+    }
+
+    console.log("DB incomplete → using API instead");
   }
 
   // 🔹 STEP 2: fallback to API
-  console.log("USING API FALLBACK");
+  try {
+    console.log("USING API FALLBACK");
 
-  const res = await fetch("/api/autofill", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ plantName: newPlant.name }),
-  });
+    const res = await fetch("/api/autofill", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ plantName: newPlant.name }),
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (data.error) {
-    alert(data.error);
-    return;
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
+
+    console.log("API RESPONSE:", data);
+
+    setNewPlant((prev) => ({
+      ...prev,
+      name: data.name || prev.name,
+      type: data.type || "",
+      ph: data.ph || "",
+      description: data.description || "",
+      fertilizer: data.fertilizer || "",
+      signs: data.signs || "",
+      month: data.schedule ? Object.keys(data.schedule)[0] : prev.month,
+      action: data.schedule ? Object.values(data.schedule)[0] : "",
+    }));
+
+    // 🔥 OPTIONAL: enrich DB automatically (HIGHLY recommended)
+    await supabase
+      .from("plants")
+      .update({
+        description: data.description,
+        ph: data.ph,
+        fertilizer: data.fertilizer,
+        signs: data.signs,
+      })
+      .eq("name", data.name);
+
+    console.log("DB UPDATED WITH API DATA");
+
+  } catch (err) {
+    console.error("AUTOFILL ERROR:", err);
+    alert("Autofill failed");
   }
-
-  setNewPlant((prev) => ({
-    ...prev,
-    name: data.name || prev.name,
-    type: data.type || "",
-    ph: data.ph || "",
-    description: data.description || "",
-    fertilizer: data.fertilizer || "",
-    signs: data.signs || "",
-    month: data.schedule ? Object.keys(data.schedule)[0] : prev.month,
-    action: data.schedule ? Object.values(data.schedule)[0] : "",
-  }));
 }
 
 
