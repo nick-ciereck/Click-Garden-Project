@@ -167,7 +167,7 @@ function getPlantDetails(plant) {
 export default function PlantLibrary() {
   const [plants, setPlants] = useState([]);
   const [selectedPlantName, setSelectedPlantName] = useState("");
-  const selectedPlant = plants.find((p) => p.name === selectedPlantName) || plants[0];
+  const selectedPlant = plants.length > 0 ? plants.find((p) => p.name === selectedPlantName) || plants[0] : null;
 
 const selectedDetails = selectedPlant
   ? getPlantDetails(selectedPlant)
@@ -239,12 +239,12 @@ const selectedDetails = selectedPlant
 
           <div>
             <div className="text-xs text-slate-500">Why now</div>
-            <div>{getUrgency(selectedPlant, "April").reason}</div>
+            <div>{selectedPlant ? getUrgency(selectedPlant, "April").reason : ""}</div>
           </div>
 
           <div>
             <div className="text-xs text-slate-500">What to do</div>
-            <div>{getActionGuide(selectedPlant, "April")}</div>
+            <div>{selectedPlant ? getActionGuide(selectedPlant, "April") : ""}</div>
           </div>
 
           <div>
