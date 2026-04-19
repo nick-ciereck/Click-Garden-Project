@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRightLeft, Beaker, CloudRain, Scissors, Sprout, Sun } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import { useRouter } from "next/navigation";
 
 
 const weatherSummary = {
@@ -212,6 +213,7 @@ export default function ClickGardenWebsite() {
   const [monthFilter, setMonthFilter] = useState("April");
   const [plantsData, setPlantsData] = useState([]);
   const [selectedPlantName, setSelectedPlantName] = useState(basePlants[0]?.name || "");
+	const router = useRouter();
 
   const [newPlant, setNewPlant] = useState({
     name: "",
@@ -397,6 +399,7 @@ const currentMonthPlants = useMemo(() => {
 
   const selectedPlant = currentMonthPlants.find((p) => p.name === selectedPlantName) || currentMonthPlants[0] || basePlants[0];
   const selectedDetails = getPlantDetails(selectedPlant);
+	
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f0fdf4,_#ffffff_45%,_#f8fafc)] p-4 text-slate-800 sm:p-6">
@@ -443,6 +446,12 @@ const currentMonthPlants = useMemo(() => {
 					  >
 						Add Plant
 					  </button>
+					  <button
+						  onClick={() => router.push("/library")}
+						  className="mt-2 bg-green-600 text-white px-4 py-2 rounded"
+						>
+						  Plant Library
+						</button>
 					</div>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">This view keeps the quick answers you asked for while bringing back clickable plant details like pH, descriptions, and fertilizer notes.</p>
             </div>
