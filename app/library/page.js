@@ -7,6 +7,7 @@ import { supabase } from "../../lib/supabase";
 function getFlags(plant, month) {
   const a = (plant.schedule?.[month] || "").toLowerCase();
   const name = plant.name.toLowerCase();
+  
   return {
     germinate: /indoor|tray|tent|ziploc|seed|spring seeds|direct sow/i.test(a),
     cuttings: /cuttings/i.test(a),
@@ -15,16 +16,7 @@ function getFlags(plant, month) {
   };
 }
 
-const weatherSummary = {
-  location: "San Jose, CA",
-  updatedFor: "April 7–13, 2026",
-  outlook: "Warm midweek, then showers Thursday through Sunday.",
-  warmHigh: 76,
-  rainyDays: ["Thursday", "Friday", "Saturday", "Sunday"],
-  coolNights: true,
-};
-
-function getUrgency(plant, month) {
+function getUrgency(plant, month, weatherSummary){
   const a = (plant.schedule?.[month] || "").toLowerCase();
   const name = plant.name.toLowerCase();
   const flags = getFlags(plant, month);
@@ -163,12 +155,59 @@ function getPlantDetails(plant) {
     "December"
   ];
 
+useEffect(() => {
+  async function loadWeather() {
+    try {
+      const res = await fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=37.3382&longitude=-121.8863&daily=temperature_2m_max,precipitation_sum&timezone=auto"
+      );
+
+      const data = await res.json();
+
+      const temps = data.daily.temperature_2m_max;
+      const rain = data.daily.precipitation_sum;
+
+      const rainyDays = rain
+        .map((val, i) => (val > 0 ? i : null))
+        .filter((i) => i !== null)
+        .map((i) =>
+          new Date(data.daily.time[i]).toLocaleDateString("en-US", {
+            weekday: "long",
+          })
+        );
+
+      setWeatherSummary({
+        location: "San Jose, CA",
+        updatedFor: new Date().toLocaleDateString(),
+        outlook: "Auto-generated from forecast",
+        warmHigh: Math.max(...temps),
+        rainyDays,
+        coolNights: Math.min(...temps) < 55,
+      });
+
+    } catch (err) {
+      console.log("WEATHER ERROR:", err);
+
+      setWeatherSummary({
+        location: "San Jose, CA",
+        updatedFor: new Date().toLocaleDateString(),
+        outlook: "Weather unavailable",
+        warmHigh: 70,
+        rainyDays: [],
+        coolNights: false,
+      });
+    }
+  }
+
+  loadWeather();
+}, []);
 
 export default function PlantLibrary() {
   const [plants, setPlants] = useState([]);
   const [selectedPlantName, setSelectedPlantName] = useState("");
   const selectedPlant = plants.length > 0 ? plants.find((p) => p.name === selectedPlantName) || plants[0] : null;
-
+  const [weatherSummary, setWeatherSummary] = useState(null);
+  const currentMonth = new Date().toLocaleString("en-US", { month: "long", });
 const selectedDetails = selectedPlant
   ? getPlantDetails(selectedPlant)
   : { ph: "", description: "", fertilizer: "", signs: "" };
@@ -239,12 +278,12 @@ const selectedDetails = selectedPlant
 
           <div>
             <div className="text-xs text-slate-500">Why now</div>
-            <div>{selectedPlant ? getUrgency(selectedPlant, "April").reason : ""}</div>
+            <div>{selectedPlant ? getUrgency(selectedPlant, currentMonth, weatherSummary).reason : ""}</div>
           </div>
 
           <div>
             <div className="text-xs text-slate-500">What to do</div>
-            <div>{selectedPlant ? getActionGuide(selectedPlant, "April") : ""}</div>
+            <div>{selectedPlant ? getActionGuide(selectedPlant, currentMonth) : ""}</div>
           </div>
 
           <div>
