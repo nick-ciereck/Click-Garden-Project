@@ -215,7 +215,10 @@ export default function ClickGardenWebsite() {
 	  fertilizer: "",
 	  signs: ""
 	});
-  const currentMonthPlants = useMemo(() => {const source = plants.length ? plants : basePlants; return source.filter((p) => p.schedule?.[monthFilter]); }, [plants, monthFilter]);
+  const currentMonthPlants = useMemo(() => {
+		  const source = plants.length ? plants : basePlants;
+		  return source.filter((p) => p.schedule?.[monthFilter]);
+		}, [plants, monthFilter]);
   const selectedPlant =
 	  currentMonthPlants.length > 0
 	    ? currentMonthPlants.find((p) => p.name === selectedPlantName) || currentMonthPlants[0]
