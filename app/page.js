@@ -1,5 +1,6 @@
 "use client";
 
+
 import React, { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowRightLeft, Beaker, CloudRain, Scissors, Sprout, Sun } from "lucide-react";
 import { supabase } from "../lib/supabase";
