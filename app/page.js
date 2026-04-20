@@ -214,7 +214,7 @@ export default function ClickGardenWebsite() {
 	  fertilizer: "",
 	  signs: ""
 	});
-  const currentMonthPlants = useMemo(() => {const source = plants.length ? plants : basePlants; return source.filter((p) => p.schedule?.[monthFilter]); }, [plants, monthFilter, weatherSummary]);
+  const currentMonthPlants = useMemo(() => {const source = plants.length ? plants : basePlants; return source.filter((p) => p.schedule?.[monthFilter]); }, [currentMonthPlants, monthFilter, weatherSummary]);
   const selectedPlant = currentMonthPlants.find((p) => p.name === selectedPlantName) ||  currentMonthPlants[0] || basePlants[0];
   const selectedDetails = selectedPlant ? getPlantDetails(selectedPlant) : { ph: "", description: "", fertilizer: "", signs: "" };
 
@@ -422,7 +422,7 @@ async function autoFillPlant() {
   fetchPlants();
 }, []);
   const buckets = useMemo(() => {
-    const rows = currentMonthPlants.map((p) => ({ plant: p, flags: getFlags(p, monthFilter), urgency: getUrgency(p, currentMonth, weatherSummary) }));
+    const rows = currentMonthPlants.map((p) => ({ plant: p, flags: getFlags(p, monthFilter), urgency: getUrgency(plant, currentMonth, weatherSummary) }));
     return {
       germinate: rows.filter((r) => r.flags.germinate),
       cuttings: rows.filter((r) => r.flags.cuttings),
@@ -431,11 +431,6 @@ async function autoFillPlant() {
       urgent: rows.filter((r) => r.urgency.level === "High"),
     };
   }, [currentMonthPlants, monthFilter]);
-
-  
-  const selectedDetails = selectedPlant
-  ? getPlantDetails(selectedPlant)
-  : { ph: "", description: "", fertilizer: "", signs: "" };
 	
   if (!plants.length || !weatherSummary) {
   	return <div className="p-6">Loading...</div>;
@@ -580,7 +575,7 @@ async function autoFillPlant() {
             <div className="grid gap-3">
               {currentMonthPlants.map((plant) => {
                 const flags = getFlags(plant, monthFilter);
-                const urgency = getUrgency(p, currentMonth, weatherSummary);
+                const urgency = getUrgency(plant, currentMonth, weatherSummary);
                 const active = plant.name === selectedPlant?.name;
                 return (
                   <button
