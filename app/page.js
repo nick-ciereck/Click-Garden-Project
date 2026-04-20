@@ -5,18 +5,6 @@ import { AlertTriangle, ArrowRightLeft, Beaker, CloudRain, Scissors, Sprout, Sun
 import { supabase } from "../lib/supabase";
 import { useRouter } from "next/navigation";
 
-
-const weatherSummary = {
-  location: "San Jose, CA",
-  updatedFor: "April 7–13, 2026",
-  outlook: "Warm midweek, then showers Thursday through Sunday.",
-  warmHigh: 76,
-  rainyDays: ["Thursday", "Friday", "Saturday", "Sunday"],
-  coolNights: true,
-};
-
-
-
 const basePlants = [
   { name: "Basil: Sweet italian large leaf", type: "Herbs", schedule: { April: "Indoor Start / Direct Sow", May: "Indoor Start / Direct Sow / Cuttings", July: "Cuttings" } },
   { name: "Holy basil: Tulsi", type: "Herbs", schedule: { April: "Indoor Start / Direct Sow", May: "Indoor Start / Direct Sow / Cuttings" } },
@@ -61,7 +49,7 @@ function getFlags(plant, month) {
   };
 }
 
-function getUrgency(plant, month) {
+function getUrgency(plant, month, weatherSummary) {
   const a = (plant.schedule?.[month] || "").toLowerCase();
   const name = plant.name.toLowerCase();
   const flags = getFlags(plant, month);
@@ -210,21 +198,71 @@ function getPlantDetails(plant) {
   ];
   
 export default function ClickGardenWebsite() {
-  const [monthFilter, setMonthFilter] = useState("April");
-  const [plantsData, setPlantsData] = useState([]);
-  const [selectedPlantName, setSelectedPlantName] = useState(basePlants[0]?.name || "");
-	const router = useRouter();
-
+  const [plants, setPlants] = useState([]);
+  const [selectedPlantName, setSelectedPlantName] = useState("");
+  const [weatherSummary, setWeatherSummary] = useState(null);
+  const currentMonth = new Date().toLocaleString("en-US", {month: "long",});
+  const [monthFilter, setMonthFilter] = useState(currentMonth);
+  const router = useRouter();
   const [newPlant, setNewPlant] = useState({
-    name: "",
-    type: "",
-    month: months[new Date().getMonth()],
-    action: "",
-    ph: "",
-    description: "",
-    fertilizer: "",
-    signs: ""
-  });
+	  name: "",
+	  type: "",
+	  month: currentMonth,
+	  action: "",
+	  ph: "",
+	  description: "",
+	  fertilizer: "",
+	  signs: ""
+	});
+  const currentMonthPlants = useMemo(() => {const source = plants.length ? plants : basePlants; return source.filter((p) => p.schedule?.[monthFilter]); }, [plants, monthFilter, weatherSummary]);
+  const selectedPlant = currentMonthPlants.find((p) => p.name === selectedPlantName) ||  currentMonthPlants[0] || basePlants[0];
+  const selectedDetails = selectedPlant ? getPlantDetails(selectedPlant) : { ph: "", description: "", fertilizer: "", signs: "" };
+
+useEffect(() => {
+  async function loadWeather() {
+    try {
+      const res = await fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=37.3382&longitude=-121.8863&daily=temperature_2m_max,precipitation_sum&timezone=auto"
+      );
+
+      const data = await res.json();
+
+      const temps = data.daily.temperature_2m_max;
+      const rain = data.daily.precipitation_sum;
+
+      const rainyDays = rain
+        .map((val, i) => (val > 0 ? i : null))
+        .filter((i) => i !== null)
+        .map((i) =>
+          new Date(data.daily.time[i]).toLocaleDateString("en-US", {
+            weekday: "long",
+          })
+        );
+
+      setWeatherSummary({
+        location: "San Jose, CA",
+        updatedFor: new Date().toLocaleDateString(),
+        outlook: "Auto-generated forecast",
+        warmHigh: Math.max(...temps),
+        rainyDays,
+        coolNights: Math.min(...temps) < 55,
+      });
+    } catch (err) {
+      console.log("WEATHER ERROR:", err);
+
+      setWeatherSummary({
+        location: "San Jose, CA",
+        updatedFor: new Date().toLocaleDateString(),
+        outlook: "Weather unavailable",
+        warmHigh: 70,
+        rainyDays: [],
+        coolNights: false,
+      });
+    }
+  }
+
+  loadWeather();
+}, []);
 
 
 async function addPlant() {
@@ -250,7 +288,7 @@ async function addPlant() {
   if (error) {
     console.log("ERROR:", error);
   } else {
-	  setPlantsData((prev) => [...prev, ...data]);
+	  setPlants((prev) => [...prev, ...data]);
 		setNewPlant({
 			  name: "",
 			  type: "",
@@ -270,7 +308,7 @@ async function autoFillPlant() {
   const search = newPlant.name.toLowerCase();
 
   // 🔹 STEP 1: find matches in DB
-  const matches = plantsData.filter((p) =>
+  const matches = plants.filter((p) =>
     p.name.toLowerCase().includes(search)
   );
 
@@ -359,10 +397,7 @@ async function autoFillPlant() {
 }
 
 
-const currentMonthPlants = useMemo(() => {
-  const source = plantsData.length ? plantsData : basePlants;
-  return source.filter((p) => p.schedule?.[monthFilter]);
-}, [plantsData, monthFilter]);
+
 
   useEffect(() => {
     if (!currentMonthPlants.find((p) => p.name === selectedPlantName)) {
@@ -380,14 +415,14 @@ const currentMonthPlants = useMemo(() => {
       console.log("FETCH ERROR:", error);
     } else {
       console.log("FETCHED:", data);
-      setPlantsData(data);
+      setPlants(data);
     }
   }
 
   fetchPlants();
 }, []);
   const buckets = useMemo(() => {
-    const rows = currentMonthPlants.map((p) => ({ plant: p, flags: getFlags(p, monthFilter), urgency: getUrgency(p, monthFilter) }));
+    const rows = currentMonthPlants.map((p) => ({ plant: p, flags: getFlags(p, monthFilter), urgency: getUrgency(p, currentMonth, weatherSummary) }));
     return {
       germinate: rows.filter((r) => r.flags.germinate),
       cuttings: rows.filter((r) => r.flags.cuttings),
@@ -397,10 +432,14 @@ const currentMonthPlants = useMemo(() => {
     };
   }, [currentMonthPlants, monthFilter]);
 
-  const selectedPlant = currentMonthPlants.find((p) => p.name === selectedPlantName) || currentMonthPlants[0] || basePlants[0];
-  const selectedDetails = getPlantDetails(selectedPlant);
+  
+  const selectedDetails = selectedPlant
+  ? getPlantDetails(selectedPlant)
+  : { ph: "", description: "", fertilizer: "", signs: "" };
 	
-
+  if (!plants.length || !weatherSummary) {
+  	return <div className="p-6">Loading...</div>;
+  }
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f0fdf4,_#ffffff_45%,_#f8fafc)] p-4 text-slate-800 sm:p-6">
       <div className="mx-auto max-w-6xl space-y-6">
@@ -517,7 +556,7 @@ const currentMonthPlants = useMemo(() => {
           </div>
 
           <aside className="rounded-3xl border border-green-100 bg-white p-5 shadow-sm sm:p-6 xl:sticky xl:top-4 self-start">
-            <h2 className="text-xl font-semibold text-slate-900">Right now in {monthFilter}</h2>
+            <h2 className="text-xl font-semibold text-slate-900">Right now in {currentMonth}</h2>
             <p className="mt-1 text-sm text-slate-500">Quick answers that stay visible on desktop and move above the plant list on phones.</p>
             <div className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
               <div className="rounded-2xl bg-blue-50 p-4"><strong>🌱 Seeds to germinate right now:</strong> {buckets.germinate.slice(0, 6).map((r) => r.plant.name).join(", ") || "None right now."}</div>
@@ -541,7 +580,7 @@ const currentMonthPlants = useMemo(() => {
             <div className="grid gap-3">
               {currentMonthPlants.map((plant) => {
                 const flags = getFlags(plant, monthFilter);
-                const urgency = getUrgency(plant, monthFilter);
+                const urgency = getUrgency(p, currentMonth, weatherSummary);
                 const active = plant.name === selectedPlant?.name;
                 return (
                   <button
@@ -587,11 +626,11 @@ const currentMonthPlants = useMemo(() => {
                 </div>
                 <div className="rounded-xl bg-white p-3 ring-1 ring-slate-100">
                   <div className="text-xs uppercase tracking-wide text-slate-500">Why now</div>
-                  <div className="mt-1 text-sm leading-6 text-slate-700">{getUrgency(selectedPlant, monthFilter).reason}</div>
+                  <div className="mt-1 text-sm leading-6 text-slate-700">{selectedPlant && weatherSummary ? getUrgency(selectedPlant, currentMonth, weatherSummary).reason: ""}</div>
                 </div>
                 <div className="rounded-xl bg-green-50 p-3 ring-1 ring-green-100">
                   <div className="text-xs uppercase tracking-wide text-slate-500">What to do</div>
-                  <div className="mt-1 text-sm leading-6 text-slate-700">{getActionGuide(selectedPlant, monthFilter)}</div>
+                  <div className="mt-1 text-sm leading-6 text-slate-700">{selectedPlant ? getActionGuide(selectedPlant, monthFilter) : ""}</div>
                 </div>
                 <div className="rounded-xl bg-white p-3 ring-1 ring-slate-100">
                   <div className="text-xs uppercase tracking-wide text-slate-500">Fertilizer notes</div>
