@@ -423,19 +423,33 @@ async function autoFillPlant() {
   fetchPlants();
 }, []);
   const buckets = useMemo(() => {
-    const rows = currentMonthPlants.map((p) => ({ plant: p, flags: getFlags(p, monthFilter), urgency: getUrgency(p, currentMonth, weatherSummary) }));
+  if (!weatherSummary) {
     return {
-      germinate: rows.filter((r) => r.flags.germinate),
-      cuttings: rows.filter((r) => r.flags.cuttings),
-      transplant: rows.filter((r) => r.flags.transplant),
-      fertilize: rows.filter((r) => r.flags.fertilize),
-      urgent: rows.filter((r) => r.urgency.level === "High"),
+      germinate: [],
+      cuttings: [],
+      transplant: [],
+      fertilize: [],
+      urgent: [],
     };
-  }, [currentMonthPlants, monthFilter, weatherSummary]);
-	
-  if (!plants.length || !weatherSummary) {
-  	return <div className="p-6">Loading...</div>;
   }
+  const rows = currentMonthPlants.map((p) => ({
+    plant: p,
+    flags: getFlags(p, monthFilter),
+    urgency: getUrgency(p, currentMonth, weatherSummary),
+  }));
+
+  return {
+    germinate: rows.filter((r) => r.flags.germinate),
+    cuttings: rows.filter((r) => r.flags.cuttings),
+    transplant: rows.filter((r) => r.flags.transplant),
+    fertilize: rows.filter((r) => r.flags.fertilize),
+    urgent: rows.filter((r) => r.urgency.level === "High"),
+  };
+}, [currentMonthPlants, monthFilter, weatherSummary]);
+	
+    if (!plants.length || !weatherSummary) {
+	  return <div>Loading...</div>;
+	}
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f0fdf4,_#ffffff_45%,_#f8fafc)] p-4 text-slate-800 sm:p-6">
       <div className="mx-auto max-w-6xl space-y-6">
