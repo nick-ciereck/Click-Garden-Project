@@ -216,8 +216,13 @@ export default function ClickGardenWebsite() {
 	  signs: ""
 	});
   const currentMonthPlants = useMemo(() => {const source = plants.length ? plants : basePlants; return source.filter((p) => p.schedule?.[monthFilter]); }, [plants, monthFilter]);
-  const selectedPlant = currentMonthPlants.find((p) => p.name === selectedPlantName) ||  currentMonthPlants[0] || basePlants[0];
-  const selectedDetails = selectedPlant ? getPlantDetails(selectedPlant) : { ph: "", description: "", fertilizer: "", signs: "" };
+  const selectedPlant =
+	  currentMonthPlants.length > 0
+	    ? currentMonthPlants.find((p) => p.name === selectedPlantName) || currentMonthPlants[0]
+	    : null;
+  const selectedDetails = selectedPlant
+	  ? getPlantDetails(selectedPlant)
+	  : { ph: "", description: "", fertilizer: "", signs: "" };
 
 useEffect(() => {
   async function loadWeather() {
@@ -590,7 +595,9 @@ async function autoFillPlant() {
             <div className="grid gap-3">
               {currentMonthPlants.map((plant) => {
                 const flags = getFlags(plant, monthFilter);
-                const urgency = getUrgency(plant, currentMonth, weatherSummary);
+                const urgency = weatherSummary
+				  ? getUrgency(plant, currentMonth, weatherSummary)
+				  : { level: "Low", color: "bg-slate-100 text-slate-700" };
                 const active = plant.name === selectedPlant?.name;
                 return (
                   <button
