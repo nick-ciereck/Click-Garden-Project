@@ -156,7 +156,18 @@ function getPlantDetails(plant) {
     "December"
   ];
 
-useEffect(() => {
+
+
+export default function PlantLibrary() {
+  const [plants, setPlants] = useState([]);
+  const [selectedPlantName, setSelectedPlantName] = useState("");
+  const selectedPlant = plants.length > 0 ? plants.find((p) => p.name === selectedPlantName) || plants[0] : null;
+  const [weatherSummary, setWeatherSummary] = useState(null);
+  const currentMonth = new Date().toLocaleString("en-US", { month: "long", });
+const selectedDetails = selectedPlant
+  ? getPlantDetails(selectedPlant)
+  : { ph: "", description: "", fertilizer: "", signs: "" };
+  useEffect(() => {
   async function loadWeather() {
     try {
       const res = await fetch(
@@ -202,16 +213,6 @@ useEffect(() => {
 
   loadWeather();
 }, []);
-
-export default function PlantLibrary() {
-  const [plants, setPlants] = useState([]);
-  const [selectedPlantName, setSelectedPlantName] = useState("");
-  const selectedPlant = plants.length > 0 ? plants.find((p) => p.name === selectedPlantName) || plants[0] : null;
-  const [weatherSummary, setWeatherSummary] = useState(null);
-  const currentMonth = new Date().toLocaleString("en-US", { month: "long", });
-const selectedDetails = selectedPlant
-  ? getPlantDetails(selectedPlant)
-  : { ph: "", description: "", fertilizer: "", signs: "" };
   useEffect(() => {
     async function fetchPlants() {
       const { data, error } = await supabase
@@ -279,7 +280,11 @@ const selectedDetails = selectedPlant
 
           <div>
             <div className="text-xs text-slate-500">Why now</div>
-            <div>{selectedPlant ? getUrgency(selectedPlant, currentMonth, weatherSummary).reason : ""}</div>
+            <div>
+              {selectedPlant && weatherSummary
+                ? getUrgency(selectedPlant, currentMonth, weatherSummary).reason
+                : ""}
+            </div>
           </div>
 
           <div>
